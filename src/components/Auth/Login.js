@@ -64,11 +64,11 @@ const Login = () => {
         setErrors({
           general: typeof error.response.data === 'string' 
             ? error.response.data 
-            : 'An error occurred during login.'
+            : 'Có lỗi trong quá trình đăng nhập.'
         });
       } else {
         setErrors({
-          general: 'An error occurred during login. Please try again.'
+          general: 'Có lỗi trong quá trình đăng nhập. Vui lòng thử lại.'
         });
       }
     } finally {

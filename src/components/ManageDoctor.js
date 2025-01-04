@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, Modal, Form } from 'react-bootstrap';
+import { Button, Table, Modal, Form, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 
 const ManageDoctor = () => {
@@ -243,26 +243,33 @@ const ManageDoctor = () => {
                   required={modalType === 'add'}
                 />
               </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Mật khẩu</Form.Label>
-                <Form.Control
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required={modalType === 'add'}
-                />
-              </Form.Group>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Mật khẩu</Form.Label>
+                    <Form.Control
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required={modalType === 'add'}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              
               <Form.Group className="mb-3">
                 <Form.Label>Tên</Form.Label>
                 <Form.Control
@@ -283,20 +290,37 @@ const ManageDoctor = () => {
                   required
                 />
               </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Giới tính</Form.Label>
-                <Form.Select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Chọn giới tính</option>
-                  <option value="male">Nam</option>
-                  <option value="female">Nữ</option>
-                  <option value="other">Khác</option>
-                </Form.Select>
-              </Form.Group>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Ngày sinh</Form.Label>
+                    <Form.Control
+                      type="date"
+                      name="dob"
+                      value={formData.dob}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Giới tính</Form.Label>
+                    <Form.Select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Chọn giới tính</option>
+                      <option value="male">Nam</option>
+                      <option value="female">Nữ</option>
+                      <option value="other">Khác</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              </Row>
+              
               <Form.Group className="mb-3">
                 <Form.Label>Số điện thoại</Form.Label>
                 <Form.Control
@@ -307,16 +331,7 @@ const ManageDoctor = () => {
                   required
                 />
               </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Ngày sinh</Form.Label>
-                <Form.Control
-                  type="date"
-                  name="dob"
-                  value={formData.dob}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
+              
               <Form.Group className="mb-3">
                 <Form.Label>Địa chỉ</Form.Label>
                 <Form.Control

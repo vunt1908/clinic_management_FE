@@ -44,15 +44,10 @@ const Header = () => {
         { label: "Lịch sử khám bệnh", path: "/patient-examination" },
       ],
       doctor: [
-        { label: "Xem Profile", path: "/profile" },
-        // { label: "Danh sách đặt lịch khám", path: "/appointments/doctor" },
-        // { label: "Danh sách bệnh nhân chờ", path: "/patients/waiting" },
-        // { label: "Hồ sơ bệnh án", path: "/medical-records" },
+        { label: "Xem Profile", path: "/doctor-profile" },
       ],
       staff: [
         { label: "Xem Profile", path: "/profile" },
-        // { label: "Danh sách đặt lịch khám", path: "/appointments/doctor" },
-        // { label: "Tiếp nhận bệnh nhân", path: "/patients/admissions" },
       ],
       nurse: [
         { label: "Xem Profile", path: "/profile" },
@@ -89,7 +84,6 @@ const Header = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link onClick={() => navigate("/")}>Trang chủ</Nav.Link>
-            {/* <Nav.Link onClick={() => navigate("/about")}>Về chúng tôi</Nav.Link> */}
             <Nav.Link onClick={() => navigate("/departments")}>Phòng khoa</Nav.Link>
             <Nav.Link onClick={() => navigate("/doctors")}>Bác sĩ</Nav.Link>
             {user?.role === "patient" && (
@@ -118,7 +112,7 @@ const Header = () => {
             {user?.role === "nurse" && (
               <>
                 <Nav.Link onClick={() => navigate("/paraclinicalresults")}>
-                  Kết quả cận lâm sàng
+                  Kết quả xét nghiệm
                 </Nav.Link>
               </>
             )}

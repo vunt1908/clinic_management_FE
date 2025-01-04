@@ -57,11 +57,11 @@ const StaffExamination = () => {
     fetchExaminations();
   }, []);
 
-  const updatePaymentStatus = async (examId) => {
+  const updatePaymentStatus = async (examId, newStatus) => {
     try {
-      await axios.patch(
+      const response = await axios.patch(
         `http://127.0.0.1:8000/api/examination/${examId}/update_payment_status/`,
-        null,
+        { status: newStatus },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
         }
@@ -69,11 +69,14 @@ const StaffExamination = () => {
 
       setExaminations((prev) =>
         prev.map((exam) =>
-          exam.id === examId ? { ...exam, payment: { ...exam.payment, status: "completed" } } : exam
+          exam.id === examId ? { ...exam, payment: { ...exam.payment, status: newStatus } } : exam
         )
       );
-    } catch {
+
+      alert(response.data.message);
+    } catch (error) {
       alert("Cập nhật trạng thái thanh toán thất bại!");
+      console.error(error);
     }
   };
 
@@ -83,8 +86,8 @@ const StaffExamination = () => {
         return "Chưa thanh toán";
       case "completed":
         return "Đã thanh toán";
-      case "failed":
-        return "Thanh toán lỗi";
+      default:
+        return "Không xác định";
     }
   };
 
@@ -131,9 +134,17 @@ const StaffExamination = () => {
                   {exam.payment.status === "pending" && (
                     <Button
                       variant="success"
-                      onClick={() => updatePaymentStatus(exam.id)}
+                      onClick={() => updatePaymentStatus(exam.id, "completed")}
                     >
                       Đã thanh toán
+                    </Button>
+                  )}
+                  {exam.payment.status === "completed" && (
+                    <Button
+                      variant="warning"
+                      onClick={() => updatePaymentStatus(exam.id, "pending")}
+                    >
+                      Hoàn lại trạng thái chờ
                     </Button>
                   )}
                 </td>

@@ -283,7 +283,9 @@ const ParaclinicalResults = () => {
                         ? `${patient.user.last_name} ${patient.user.first_name}`
                         : "Đang tải..."}
                     </td>
-                    <td>{appointment.date}</td>
+                    <td>
+                      {appointment.date ? new Date(appointment.date).toLocaleDateString('en-GB') : "Đang tải..."}
+                    </td>
                     <td>{appointment.time_slot}</td>
                     <td>
                       <Dropdown>

@@ -152,6 +152,27 @@ const ManageAppointment = () => {
     }
   };
 
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'Chờ xác nhận';
+      case 'confirmed':
+        return 'Đã xác nhận';
+      case 'examining':
+        return 'Đang khám';
+      case 'awaiting_clinical_results':
+        return 'Đang thực hiện xét nghiệm cận lâm sàng';
+      case 'paraclinical_results_available':
+        return 'Đã có kết quả xét nghiệm cận lâm sàng';
+      case 'completed':
+        return 'Đã hoàn thành';
+      case 'cancelled':
+        return 'Đã hủy';
+      default:
+        return status;
+    }
+  };
+
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -169,6 +190,7 @@ const ManageAppointment = () => {
             <th>Ngày</th>
             <th>Thời gian khám</th>
             <th>Lý do</th>
+            <th>Ghi chú</th>
             <th>Trạng thái</th>
             <th>Hành động</th>
           </tr>
@@ -194,13 +216,35 @@ const ManageAppointment = () => {
                 </td>
                 <td>{appointment.time_slot}</td>
                 <td>{appointment.reason}</td>
-                <td>{{
+                <td>{appointment.notes}</td>
+                {/* <td>{{
                   pending: "Chờ xác nhận",
                   confirmed: "Đã xác nhận",
                   examining: "Đang khám",
                   completed: "Đã hoàn thành",
                   cancelled: "Đã hủy",
                 }[appointment.status] || "Không có"}
+                </td> */}
+                <td>
+                  <span
+                    className={`badge ${
+                      appointment.status === "confirmed"
+                        ? "bg-primary"
+                        : appointment.status === "examining"
+                        ? "bg-warning"
+                        : appointment.status === "awaiting_clinical_results"
+                        ? "bg-warning"
+                        : appointment.status === "paraclinical_results_available"
+                        ? "bg-success"
+                        : appointment.status === "completed"
+                        ? "bg-success"
+                        : appointment.status === "cancelled"
+                        ? "bg-danger"
+                        : "bg-warning"
+                      }`}
+                    >
+                      {getStatusText(appointment.status)}
+                    </span>
                 </td>
                 <td>
                   <Button

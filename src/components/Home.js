@@ -29,13 +29,19 @@ const Home = () => {
       case "doctor":
         return (
           <Button variant="primary" onClick={() => navigate("/appointments/doctor")}>
-            Xem danh sách đặt lịch
+            Xem danh sách khám bệnh
           </Button>
         );
       case "staff":
         return (
           <Button variant="primary" onClick={() => navigate("/receptions")}>
             Tiếp nhận bệnh nhân
+          </Button>
+        );
+      case "nurse":
+        return (
+          <Button variant="primary" onClick={() => navigate("/paraclinicalresults")}>
+            Cập nhật kết quả xét nghiệm
           </Button>
         );
       default:

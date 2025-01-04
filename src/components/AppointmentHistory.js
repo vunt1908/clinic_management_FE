@@ -11,6 +11,7 @@ const AppointmentHistory = () => {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [sortOrder, setSortOrder] = useState("desc");
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const AppointmentHistory = () => {
       fetchDoctors(doctorIds);
     } catch (error) {
       setErrorMessage("Không thể tải lịch sử đặt lịch khám.");
-      console.error("Error fetching appointments:", error);
+      console.error("Lỗi API lịch hẹn", error);
     } finally {
       setLoading(false);
     }
@@ -46,7 +47,7 @@ const AppointmentHistory = () => {
       });
       setDoctors(response.data.filter(doctor => uniqueDoctorIds.includes(doctor.id)));
     } catch (error) {
-      console.error("Error fetching doctors:", error);
+      console.error("Lỗi API bác sĩ", error);
     }
   };
 
@@ -97,6 +98,16 @@ const AppointmentHistory = () => {
     }
   };
 
+  const handleSort = () => {
+    const sortedAppointments = [...appointments].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+    });
+    setAppointments(sortedAppointments);
+    setSortOrder(sortOrder === "desc" ? "asc" : "desc"); 
+  };
+
   if (loading) {
     return (
       <Container className="mt-5 text-center">
@@ -132,7 +143,14 @@ const AppointmentHistory = () => {
             <thead>
               <tr>
                 <th>Bác sĩ</th>
-                <th>Ngày</th>
+                <th>
+                  Ngày{" "}
+                  <i
+                    className={`bi ${sortOrder === "desc" ? "bi-sort-down" : "bi-sort-up"}`}
+                    style={{ cursor: "pointer" }}
+                    onClick={handleSort}
+                  ></i>
+                </th>
                 <th>Thời gian</th>
                 <th>Lý do</th>
                 <th>Trạng thái</th>

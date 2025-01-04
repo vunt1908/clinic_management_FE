@@ -83,7 +83,7 @@ const Admin = () => {
 
           <Link to="/admin/manage-services" className="d-flex align-items-center p-3 text-decoration-none text-dark">
             <FaHospital className="me-2" />
-            {isSidebarOpen && "Quản lý dịch vụ cận lâm sàng"}
+            {isSidebarOpen && "Quản lý dịch vụ"}
           </Link>
           
           <Link to="/admin/manage-departments" className="d-flex align-items-center p-3 text-decoration-none text-dark">
@@ -96,10 +96,10 @@ const Admin = () => {
             {isSidebarOpen && "Quản lý thông tin khám bệnh"}
           </Link>
 
-          <Link to="/admin/manage-payments" className="d-flex align-items-center p-3 text-decoration-none text-dark">
+          {/* <Link to="/admin/manage-payments" className="d-flex align-items-center p-3 text-decoration-none text-dark">
             <FaHospital className="me-2" />
             {isSidebarOpen && "Quản lý thanh toán"}
-          </Link>
+          </Link> */}
         </nav>
       </div>
 

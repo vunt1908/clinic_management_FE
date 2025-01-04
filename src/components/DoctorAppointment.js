@@ -15,6 +15,7 @@ import Header from './Header';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import robotoFont from "../fonts/roboto-regular";
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const DoctorAppointments = () => {
   const { user } = useAuth();
@@ -22,8 +23,10 @@ const DoctorAppointments = () => {
   const [patients, setPatients] = useState({});
   const [services, setServices] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState(null); 
+  const [showModal, setShowModal] = useState(false);
   const [examinationData, setExaminationData] = useState({
     pathological_process: "",
     personal_history: "",
@@ -37,6 +40,8 @@ const DoctorAppointments = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [sortDate, setSortDate] = useState("desc");
+  const [sortName, setSortName] = useState("asc");
 
   const fetchData = async () => {
     try {
@@ -110,7 +115,7 @@ const DoctorAppointments = () => {
           setSelectedServices([]);
         }
       } catch (err) {
-        console.error("Không thể tải thông tin examination:", err);
+        console.error("Không thể tải thông tin khám bệnh:", err);
         setExaminationData({
           pathological_process: "",
           personal_history: "",
@@ -183,7 +188,7 @@ const DoctorAppointments = () => {
 
     const currentYear = new Date().getFullYear();
 
-    const title = "PHIẾU THU TIỀN KIÊM BẢNG KÊ CHI PHÍ";
+    const title = "PHIẾU CHỈ ĐỊNH DỊCH VỤ KIÊM BẢNG KÊ CHI PHÍ";
     const titleWidth = doc.getTextWidth(title);  
     const pageWidth = doc.internal.pageSize.width;  
     const titleX = (pageWidth - titleWidth) / 2;
@@ -473,6 +478,68 @@ const DoctorAppointments = () => {
     }
   };
 
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const removeVietnamese = (str) => {
+      return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") 
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D");
+    };
+  
+    const handleSearch = (e) => {
+      const value = removeVietnamese(e.target.value.toLowerCase());
+      setSearchTerm(value);
+  
+      const rows = document.querySelectorAll("tbody tr");
+      rows.forEach((row) => {
+        const patientName = row.querySelector(".patient-name")?.innerText.toLowerCase() || "";
+        const normalizePatientName = removeVietnamese(patientName.toLowerCase());
+        if (normalizePatientName.includes(value)) {
+          row.classList.remove("d-none"); 
+        } else {
+          row.classList.add("d-none"); 
+        }
+      });
+    };
+
+    const handleShowPatient = (patientId) => {
+      const patient = patients[patientId];
+      if (patient) {
+        setSelectedPatient(patient);
+        setShowModal(true);
+      } else {
+        console.error("Không tìm thấy thông tin bệnh nhân", patientId);
+      }
+    };
+
+    const handleSortDate = () => {
+      const sortedAppointments = [...appointments].sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return sortDate === "desc" ? dateB - dateA : dateA - dateB;
+      });
+      setAppointments(sortedAppointments);
+      setSortDate(sortDate === "desc" ? "asc" : "desc"); 
+    };
+
+    const handleSortName = () => {
+      const sortedAppointments = [...appointments].sort((a, b) => {
+        const patientA = patients[a.patient]?.user.first_name || "";
+        const patientB = patients[b.patient]?.user.first_name || "";
+    
+        if (sortName === "asc") {
+          return patientA.localeCompare(patientB);
+        } else {
+          return patientB.localeCompare(patientA);
+        }
+      });
+    
+      setAppointments(sortedAppointments);
+      setSortName(sortName === "asc" ? "desc" : "asc"); 
+    };
+
   if (loading) return <Spinner animation="border" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
 
@@ -481,17 +548,41 @@ const DoctorAppointments = () => {
       <Header />
       <Container className="mt-5">
         <h2 className="text-center mb-4">Danh sách khám bệnh</h2>
+
+        <Form className="mb-4">
+          <Form.Control
+            type="text"
+            placeholder="Tìm kiếm theo tên bệnh nhân..."
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+        </Form>
+
         {appointments.length === 0 ? (
           <Alert variant="info">Không có lịch đặt khám nào.</Alert>
         ) : (
-          <Table striped bordered hover className="text-center">
-            <thead>
+          <Table className="table-striped table-hover table-bordered shadow-sm rounded text-center">
+            <thead className="bg-primary text-white">
               <tr>
                 <th>STT</th>
-                <th>ID lịch hẹn</th>
-                <th>ID bệnh nhân</th>
-                <th>Tên bệnh nhân</th>
-                <th>Ngày</th>
+                {/* <th>ID lịch hẹn</th> */}
+                {/* <th>ID bệnh nhân</th> */}
+                <th>
+                  Tên bệnh nhân{" "}
+                  <i
+                    className={`bi ${sortName === "asc" ? "bi-sort-alpha-down" : "bi-sort-alpha-up"}`}
+                    style={{ cursor: "pointer" }}
+                    onClick={handleSortName}
+                  ></i>
+                </th>
+                <th>
+                  Ngày{" "}
+                  <i
+                    className={`bi ${sortDate === "desc" ? "bi-sort-down" : "bi-sort-up"}`}
+                    style={{ cursor: "pointer" }}
+                    onClick={handleSortDate}
+                  ></i>
+                </th>
                 <th>Thời gian</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
@@ -503,20 +594,45 @@ const DoctorAppointments = () => {
                 return (
                   <tr key={appointment.id}>
                     <td>{index + 1}</td>
-                    <td>{appointment.id}</td>
-                    <td>{patient ? patient.id : "Đang tải"}</td>
-                    <td>
+                    {/* <td>{appointment.id}</td> */}
+                    {/* <td>{patient ? patient.id : "Đang tải"}</td> */}
+                    {/* <td className="patient-name">
                       {patient
                         ? `${patient.user.last_name} ${patient.user.first_name}`
                         : "Đang tải..."}
-                    </td>
+                    </td> */}
+                    <td
+                        className="text-center text-primary patient-name"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => handleShowPatient(appointment.patient)}
+                      >
+                        {patient
+                          ? `${patient.user.last_name} ${patient.user.first_name}`
+                          : "Đang tải..."}
+                      </td>
                     <td>
                       {appointment.date ? new Date(appointment.date).toLocaleDateString('en-GB') : "Đang tải..."}
                     </td>
                     <td>{appointment.time_slot}</td>
                     <td>
                       <Dropdown>
-                        <Dropdown.Toggle variant="secondary">
+                        <Dropdown.Toggle
+                          className={`${
+                            appointment.status === "pending"
+                              ? "bg-secondary text-white"
+                              : appointment.status === "confirmed"
+                              ? "bg-primary text-white"
+                              : appointment.status === "examining"
+                              ? "bg-warning text-dark"
+                              : appointment.status === "awaiting_clinical_results"
+                              ? "bg-info text-white"
+                              : appointment.status === "paraclinical_results_available"
+                              ? "bg-success text-white"
+                              : appointment.status === "completed"
+                              ? "bg-success text-white"
+                              : "bg-danger text-white"
+                          }`}
+                        >
                           {appointment.status === "pending"
                             ? "Chờ xác nhận"
                             : appointment.status === "confirmed"
@@ -524,38 +640,54 @@ const DoctorAppointments = () => {
                             : appointment.status === "examining"
                             ? "Đang khám"
                             : appointment.status === "awaiting_clinical_results"
-                            ? "Đang thực hiện xét nghiệm cận lâm sàng"
+                            ? "Đang thực hiện xét nghiệm"
                             : appointment.status === "paraclinical_results_available"
-                            ? "Đã có kết quả xét nghiệm cận lâm sàng"
+                            ? "Đã có kết quả xét nghiệm"
                             : appointment.status === "completed"
                             ? "Hoàn tất"
                             : "Đã hủy"}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
                           <Dropdown.Item
-                            onClick={() => handleStatusChange(appointment.id, "confirmed")}
+                            onClick={() =>
+                              handleStatusChange(appointment.id, "confirmed")
+                            }
                           >
                             Xác nhận
                           </Dropdown.Item>
                           <Dropdown.Item
-                            onClick={() => handleStatusChange(appointment.id, "examining")}
+                            onClick={() =>
+                              handleStatusChange(appointment.id, "examining")
+                            }
                           >
                             Đang khám
                           </Dropdown.Item>
                           <Dropdown.Item
-                            onClick={() => handleStatusChange(appointment.id, "awaiting_clinical_results")}
+                            onClick={() =>
+                              handleStatusChange(
+                                appointment.id,
+                                "awaiting_clinical_results"
+                              )
+                            }
                           >
-                            Đang thực hiện xét nghiệm cận lâm sàng
+                            Đang thực hiện xét nghiệm
                           </Dropdown.Item>
                           <Dropdown.Item
-                            onClick={() => handleStatusChange(appointment.id, "paraclinical_results_available")}
+                            onClick={() =>
+                              handleStatusChange(
+                                appointment.id,
+                                "paraclinical_results_available"
+                              )
+                            }
                           >
-                            Đã có kết quả xét nghiệm cận lâm sàng
+                            Có kết quả xét nghiệm
                           </Dropdown.Item>
                           <Dropdown.Item
-                            onClick={() => handleStatusChange(appointment.id, "completed")}
+                            onClick={() =>
+                              handleStatusChange(appointment.id, "completed")
+                            }
                           >
-                            Đã hoàn thành
+                            Hoàn tất
                           </Dropdown.Item>
                           <Dropdown.Item
                             onClick={() => handleStatusChange(appointment.id, "cancelled")}
@@ -567,24 +699,24 @@ const DoctorAppointments = () => {
                     </td>
                     <td>
                       <Button
-                        variant="info"
+                        variant="success"
                         className="me-2"
                         onClick={() => handleOpenModal(appointment, "details")}
                       >
-                        Xem chi tiết
+                        <i className="bi bi-eye"></i>
                       </Button>
                       <Button
                         variant="primary"
                         className="me-2"
                         onClick={() => handleOpenModal(appointment, "edit")}
                       >
-                        Chỉnh sửa
+                        <i className="bi bi-pencil"></i>
                       </Button>
                       <Button
                         variant="warning"
                         onClick={() => handleOpenModal(appointment, "assignment")}
                       >
-                        Chỉ định dịch vụ
+                        <i className="bi bi-gear"></i>
                       </Button>
                     </td>
                   </tr>
@@ -595,8 +727,37 @@ const DoctorAppointments = () => {
         )}
       </Container>
 
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Thông tin bệnh nhân</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedPatient && (
+            <>
+              <p><strong>Họ và tên:</strong> {`${selectedPatient.user.last_name} ${selectedPatient.user.first_name}`}</p>
+              <p><strong>Email:</strong> {selectedPatient.user.email}</p>
+              <p><strong>Giới tính:</strong> {selectedPatient.user.gender === "male"
+                ? "Nam"
+                : selectedPatient.user.gender === "female"
+                ? "Nữ"
+                : "Khác"}
+              </p>
+              <p><strong>Số điện thoại:</strong> {selectedPatient.user.phone}</p>
+              <p><strong>Ngày sinh:</strong> {new Date(selectedPatient.user.dob).toLocaleDateString("en-GB")}</p>
+              <p><strong>Địa chỉ:</strong> {selectedPatient.user.address}</p>
+              <p><strong>Nghề nghiệp:</strong> {selectedPatient.job}</p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Đóng
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {modalVisible && (
-        <Modal show={modalVisible} onHide={handleCloseModal} size="lg">
+        <Modal show={modalVisible} onHide={handleCloseModal} size="lg" centered>
           <Modal.Header closeButton>
             <Modal.Title>
               {modalType === "details" && "Chi tiết khám bệnh"}
@@ -722,7 +883,7 @@ const DoctorAppointments = () => {
             {modalType === "assignment" && (
               <Form>
                 <Form.Group>
-                  <Form.Label>Chỉ định dịch vụ</Form.Label>
+                  {/* <Form.Label>Chỉ định dịch vụ</Form.Label> */}
                   {services.map((service) => (
                     <Form.Check
                       key={service.id}
@@ -744,7 +905,7 @@ const DoctorAppointments = () => {
             )}
             {modalType === "assignment" && (
               <>
-                <Button variant="secondary" onClick={handleExportInvoice}>
+                <Button variant="success" onClick={handleExportInvoice}>
                   In phiếu
                 </Button>
                 <Button variant="primary" onClick={handleSaveServices}>

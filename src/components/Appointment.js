@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Container,
   Form,
   Button,
   Spinner,
@@ -130,7 +129,7 @@ const Appointment = () => {
         },
       });
       setSuccessMessage("Đặt lịch khám thành công!");
-      setTimeout(() => navigate("/appointments/history"), 1500);
+      setTimeout(() => navigate("/"), 1000);
     } catch (error) {
       const errorData = error.response?.data;
       setErrorMessage(
@@ -144,7 +143,7 @@ const Appointment = () => {
   return (
     <>
       <Header />
-      <Card className="shadow-sm mt-5 mx-5">
+      <Card className="shadow-sm mt-4 mb-4 mx-5">
         <Card.Body>
           <h2 className="text-center mb-4">Đặt lịch khám bệnh</h2>
           {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
@@ -231,18 +230,24 @@ const Appointment = () => {
                 <Form.Label>Ghi chú</Form.Label>
                 <Form.Control
                   as="textarea"
-                  rows={3}
+                  // rows={1}
                   value={formData.notes}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, notes: e.target.value }))
                   }
-                  // required
+
                 />
               </Form.Group>
 
-              <Button type="submit" variant="primary" disabled={isSubmitting}>
-                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt lịch"}
-              </Button>
+              <p>Quý khách sử dụng dịch vụ Đặt lịch khám bệnh, xin vui lòng đặt trước ít nhất là 24 giờ trước khi đến khám. 
+                Trong những trường hợp khẩn cấp hoặc nghi ngờ có các triệu chứng nguy hiểm, quý khách nên ĐẾN TRỰC TIẾP PHÒNG KHÁM hoặc đến Trung tâm Y tế gần nhất để kịp thời xử lý.
+              </p>
+
+              <div class="d-flex justify-content-center">
+                <Button type="submit" variant="primary" disabled={isSubmitting}>
+                  {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt lịch"}
+                </Button>
+              </div>
             </Form>
           )}
         </Card.Body>
