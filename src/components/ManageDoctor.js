@@ -161,9 +161,9 @@ const ManageDoctor = () => {
         </Button>
       </div>
 
-      <Table striped bordered hover responsive className='text-center'>
+      <Table striped bordered hover responsive className="text-center align-middle">
         <thead>
-          <tr>
+          <tr className='align-middle'>
             <th>Username</th>
             <th>Email</th>
             <th>Họ và tên</th>

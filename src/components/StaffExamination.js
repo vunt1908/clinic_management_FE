@@ -22,32 +22,42 @@ const StaffExamination = () => {
 
         const enrichedExaminations = await Promise.all(
           examinationsData.map(async (exam) => {
-            const [appointment, services, payment, medicalRecord] = await Promise.all([
-              axios.get(`http://127.0.0.1:8000/api/appointments/${exam.appointment}/`),
-              Promise.all(
-                exam.services.map((serviceId) =>
-                  axios.get(`http://127.0.0.1:8000/api/services/${serviceId}/`)
-                )
-              ),
-              axios.get(`http://127.0.0.1:8000/api/payments/${exam.payment}/`),
-            ]);
+            try {
+              if (!exam.payment) {
+                return null;
+              }
 
-            const patientResponse = await axios.get(
-              `http://127.0.0.1:8000/api/patients/${appointment.data.patient}/`
-            );
+              const [appointment, services, payment] = await Promise.all([
+                axios.get(`http://127.0.0.1:8000/api/appointments/${exam.appointment}/`),
+                Promise.all(
+                  exam.services.map((serviceId) =>
+                    axios.get(`http://127.0.0.1:8000/api/services/${serviceId}/`)
+                  )
+                ),
+                axios.get(`http://127.0.0.1:8000/api/payments/${exam.payment}/`),
+              ]);
 
-            return {
-              ...exam,
-              appointment: appointment.data,
-              patient: patientResponse.data,
-              services: services.map((service) => service.data),
-              payment: payment.data,
-            };
+              const patientResponse = await axios.get(
+                `http://127.0.0.1:8000/api/patients/${appointment.data.patient}/`
+              );
+
+              return {
+                ...exam,
+                appointment: appointment.data,
+                patient: patientResponse.data,
+                services: services.map((service) => service.data),
+                payment: payment.data,
+              };
+            } catch (fetchError) {
+              console.error(`Error processing exam ID ${exam.id}:`, fetchError);
+              return null;
+            }
           })
         );
 
-        setExaminations(enrichedExaminations);
+        setExaminations(enrichedExaminations.filter((exam) => exam !== null));
       } catch (err) {
+        console.error(err);
         setError("Không thể tải lịch sử khám bệnh.");
       } finally {
         setLoading(false);
@@ -73,7 +83,7 @@ const StaffExamination = () => {
         )
       );
 
-      alert(response.data.message);
+      alert("Cập nhật trạng thái thành công.");
     } catch (error) {
       alert("Cập nhật trạng thái thanh toán thất bại!");
       console.error(error);
@@ -97,9 +107,9 @@ const StaffExamination = () => {
   return (
     <>
       <Header />
-      <Container className="mt-5">
+      <div className="mt-4 mx-5">
         <h2 className="text-center mb-4">Danh sách thanh toán</h2>
-        <Table striped bordered hover>
+        <Table striped bordered hover className="text-center align-middle">
           <thead>
             <tr>
               <th>Họ và tên người bệnh</th>
@@ -152,7 +162,7 @@ const StaffExamination = () => {
             ))}
           </tbody>
         </Table>
-      </Container>
+      </div>
     </>
   );
 };

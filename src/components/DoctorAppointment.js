@@ -101,6 +101,7 @@ const DoctorAppointments = () => {
             symptoms: examination.symptoms || "",
             diagnosis: examination.diagnosis || "",
             results: examination.results || "",
+            paraclinical_results: examination.paraclinical_results || null,
           });
           setSelectedServices(examination.services || []);
         } else {
@@ -111,6 +112,7 @@ const DoctorAppointments = () => {
             symptoms: "",
             diagnosis: "",
             results: "",
+            // paraclinical_results: null,
           });
           setSelectedServices([]);
         }
@@ -123,6 +125,7 @@ const DoctorAppointments = () => {
           symptoms: "",
           diagnosis: "",
           results: "",
+          // paraclinical_results: null,
         });
         setSelectedServices([]);
       }

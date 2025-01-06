@@ -31,7 +31,7 @@ const Admin = () => {
       <div
         className={`bg-white border-end shadow-sm ${
           isSidebarOpen ? "col-3 col-md-2" : ""
-        } d-flex flex-column vh-100 p-0`}
+        } d-flex flex-column p-0`}
       >
         <div className="d-flex align-items-center justify-content-between p-3 border-bottom">
           {isSidebarOpen && <img src={logo} alt="Clinic" height="40" />}
@@ -91,10 +91,10 @@ const Admin = () => {
             {isSidebarOpen && "Quản lý khoa"}
           </Link>
 
-          <Link to="/admin/manage-examinations" className="d-flex align-items-center p-3 text-decoration-none text-dark">
+          {/* <Link to="/admin/manage-examinations" className="d-flex align-items-center p-3 text-decoration-none text-dark">
             <FaHospital className="me-2" />
             {isSidebarOpen && "Quản lý thông tin khám bệnh"}
-          </Link>
+          </Link> */}
 
           {/* <Link to="/admin/manage-payments" className="d-flex align-items-center p-3 text-decoration-none text-dark">
             <FaHospital className="me-2" />
