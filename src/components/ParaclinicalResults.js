@@ -10,8 +10,10 @@ import {
   Button,
   Form,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from './AuthContext';
 import Header from './Header';
+import Swal from 'sweetalert2'
 
 const ParaclinicalResults = () => {
   const { user } = useAuth();
@@ -34,6 +36,7 @@ const ParaclinicalResults = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
@@ -69,6 +72,11 @@ const ParaclinicalResults = () => {
   };
 
   useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
     fetchData();
   }, [user]);
 
@@ -152,10 +160,9 @@ const ParaclinicalResults = () => {
     try {
       const formData = new FormData();
       if (examinationData?.paraclinical_results instanceof File) {
-        console.log("Thêm file vào formData:", examinationData.paraclinical_results);
         formData.append("paraclinical_results", examinationData.paraclinical_results);
       } else {
-          console.log("Không có file hợp lệ.");
+          console.log("File không hợp lệ.");
       }
 
       if (selectedAppointment.examination) { 
@@ -195,6 +202,56 @@ const ParaclinicalResults = () => {
     } catch (err) {
       console.error(err);
       alert("Không thể lưu thông tin khám bệnh.");
+    }
+  };
+
+  const handleDeleteParaclinicalResult = async () => {
+    try {
+      const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa kết quả xét nghiệm này?");
+      if (!confirmDelete) return;
+  
+      if (selectedAppointment.examination) {
+        await axios.patch(
+          `http://127.0.0.1:8000/api/examination/${selectedAppointment.examination.id}/`,
+          { paraclinical_results: null },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+      } else {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/examination/?appointment=${selectedAppointment.id}`,
+          { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
+        );
+  
+        if (response.data.length !== 0) {
+          await axios.patch(
+            `http://127.0.0.1:8000/api/examination/${response.data[0].id}/`,
+            { paraclinical_results: null },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+            }
+          );
+        } else {
+          alert("Không thể xóa kết quả xét nghiệm.");
+          return;
+        }
+      }
+  
+      alert("Xóa kết quả xét nghiệm thành công");
+      setExaminationData((prevData) => ({
+        ...prevData,
+        paraclinical_results: null,
+      }));
+      handleCloseModal();
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert("Không thể xóa kết quả xét nghiệm.");
     }
   };
 
@@ -246,7 +303,21 @@ const ParaclinicalResults = () => {
       alert("Không thể lưu dịch vụ.");
     }
   };
-  
+
+  const handleStatusConfirmation = (appointmentId, newStatus) => {
+    Swal.fire({
+      title: 'Xác nhận thay đổi trạng thái',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleStatusChange(appointmentId, newStatus);
+        Swal.fire('Thành công!', 'Trạng thái đã được thay đổi.', 'success');
+      }
+    });
+  };
 
   if (loading) return <Spinner animation="border" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
@@ -272,7 +343,7 @@ const ParaclinicalResults = () => {
               </tr>
             </thead>
             <tbody className="text-center">
-              {appointments.map((appointment, index) => {
+              {appointments.filter((appointment) => appointment.status === "awaiting_clinical_results" || appointment.status === "paraclinical_results_available").map((appointment, index) => {
                 const patient = patients[appointment.patient];
                 return (
                   <tr key={appointment.id}>
@@ -289,67 +360,32 @@ const ParaclinicalResults = () => {
                     <td>{appointment.time_slot}</td>
                     <td>
                       <Dropdown>
-                        <Dropdown.Toggle variant="secondary">
-                          {appointment.status === "pending"
-                            ? "Chờ xác nhận"
-                            : appointment.status === "confirmed"
-                            ? "Đã xác nhận"
-                            : appointment.status === "examining"
-                            ? "Đang khám"
-                            : appointment.status === "awaiting_clinical_results"
-                            ? "Đang thực hiện xét nghiệm cận lâm sàng"
+                        <Dropdown.Toggle variant="info"
+                          className={`${
+                            appointment.status === "awaiting_clinical_results"
+                              ? "bg-info text-white"
+                              : appointment.status === "paraclinical_results_available"
+                              ? "bg-success text-white"
+                              : "bg-danger text-white"
+                          }`}
+                        >
+                          {appointment.status === "awaiting_clinical_results"
+                            ? "Đang thực hiện xét nghiệm"
                             : appointment.status === "paraclinical_results_available"
-                            ? "Đã có kết quả xét nghiệm cận lâm sàng"
-                            : appointment.status === "completed"
-                            ? "Hoàn tất"
+                            ? "Đã có kết quả xét nghiệm"
                             : "Đã hủy"}
                         </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <>
-                              <Dropdown.Item
-                                onClick={() =>
-                                  handleStatusChange(appointment.id, "confirmed")
-                                }
-                              >
-                                Xác nhận
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() =>
-                                  handleStatusChange(appointment.id, "examining")
-                                }
-                              >
-                                Đang khám
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() =>
-                                  handleStatusChange(appointment.id, "awaiting_clinical_results")
-                                }
-                              >
-                                Đang thực hiện xét nghiệm cận lâm sàng
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() =>
-                                  handleStatusChange(appointment.id, "paraclinical_results_available")
-                                }
-                              >
-                                Đã có kết quả xét nghiệm cận lâm sàng
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() =>
-                                  handleStatusChange(appointment.id, "completed")
-                                }
-                              >
-                                Đã hoàn thành
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() =>
-                                  handleStatusChange(appointment.id, "cancelled")
-                                }
-                              >
-                                Hủy
-                              </Dropdown.Item>
-                            </>
-                        </Dropdown.Menu>
+                        {appointment.status === "awaiting_clinical_results" && (
+                          <Dropdown.Menu>
+                            <Dropdown.Item
+                              onClick={() =>
+                                handleStatusConfirmation(appointment.id, "paraclinical_results_available")
+                              }
+                            >
+                              Đã có kết quả xét nghiệm
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        )}
                       </Dropdown>
                     </td>
                     <td>
@@ -358,13 +394,13 @@ const ParaclinicalResults = () => {
                         className="me-2"
                         onClick={() => handleOpenModal(appointment, "edit")}
                       >
-                        Thêm mới
+                        <i className="bi bi-pencil"></i>
                       </Button>
                       <Button
-                        variant="success"
+                        variant="warning"
                         onClick={() => handleOpenModal(appointment, "assignment")}
                       >
-                        Dịch vụ chỉ định
+                        <i className="bi bi-gear"></i>
                       </Button>
                     </td>
                   </tr>
@@ -376,10 +412,10 @@ const ParaclinicalResults = () => {
       </Container>
 
       {modalVisible && (
-        <Modal show={modalVisible} onHide={handleCloseModal} size="lg">
+        <Modal show={modalVisible} onHide={handleCloseModal} size="lg" centered>
           <Modal.Header closeButton>
             <Modal.Title>
-              {modalType === "edit" && "Thêm mới kết quả cận lâm sàng"}
+              {modalType === "edit" && "Kết quả xét nghiệm"}
               {modalType === "assignment" && "Chỉ định dịch vụ"}
             </Modal.Title>
           </Modal.Header>
@@ -387,26 +423,29 @@ const ParaclinicalResults = () => {
             {modalType === "edit" && (
               <Form>
                 <Form.Group>
-                <Form.Label>Kết quả cận lâm sàng</Form.Label>
-                {examinationData.paraclinical_results && (
-                  <p>
-                    <a
-                      href={examinationData.paraclinical_results}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Xem kết quả
-                    </a>
-                  </p>
+                {examinationData.paraclinical_results ? (
+                  <div>
+                    <p>
+                      <a
+                        href={examinationData.paraclinical_results}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Xem kết quả
+                      </a>
+                    </p>
+                  </div>
+                ) : (
+                  <p>Không có kết quả xét nghiệm nào.</p>
                 )}
-                <Form.Control 
-                  type="file" 
+                <Form.Control
+                  type="file"
                   onChange={(e) => {
-                      setExaminationData((prevData) => ({
-                          ...prevData,
-                          paraclinical_results: e.target.files[0],
-                      }));
-                  }} 
+                    setExaminationData((prevData) => ({
+                      ...prevData,
+                      paraclinical_results: e.target.files[0],
+                    }));
+                  }}
                 />
               </Form.Group>
               </Form>
@@ -415,14 +454,15 @@ const ParaclinicalResults = () => {
             {modalType === "assignment" && (
               <Form>
                 <Form.Group>
-                  <Form.Label>Chỉ định dịch vụ</Form.Label>
                   {services.map((service) => (
                     <Form.Check
                       key={service.id}
                       type="checkbox"
                       label={`${service.name} - ${service.price ? `${service.price.toLocaleString()} VND` : 'Liên hệ'}`}
                       checked={selectedServices.includes(service.id)}
-                      onChange={() => handleServiceToggle(service.id)}
+                      // onChange={() => handleServiceToggle(service.id)}
+                      readOnly
+                      disabled
                     />
                   ))}
                 </Form.Group>
@@ -431,18 +471,26 @@ const ParaclinicalResults = () => {
           </Modal.Body>
           <Modal.Footer>
             {modalType === "edit" && (
-              <Button variant="primary" onClick={handleSaveExamination}>
-                Lưu
-              </Button>
+              <>
+                <Button
+                  variant="danger"
+                  onClick={handleDeleteParaclinicalResult}
+                >
+                  Xóa
+                </Button>
+                <Button variant="primary" onClick={handleSaveExamination}>
+                  Lưu
+                </Button>
+              </>
             )}
-            {modalType === "assignment" && (
+            {/* {modalType === "assignment" && (
               <Button variant="primary" onClick={handleSaveServices}>
                 Lưu
               </Button>
             )}
             <Button variant="secondary" onClick={handleCloseModal}>
               Đóng
-            </Button>
+            </Button> */}
           </Modal.Footer>
         </Modal>
       )}

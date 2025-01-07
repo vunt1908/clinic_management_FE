@@ -10,12 +10,14 @@ import {
   Button,
   Form,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from './AuthContext';
 import Header from './Header';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import robotoFont from "../fonts/roboto-regular";
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import Swal from 'sweetalert2'
 
 const DoctorAppointments = () => {
   const { user } = useAuth();
@@ -42,6 +44,7 @@ const DoctorAppointments = () => {
   const [updating, setUpdating] = useState(false);
   const [sortDate, setSortDate] = useState("desc");
   const [sortName, setSortName] = useState("asc");
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
@@ -77,8 +80,13 @@ const DoctorAppointments = () => {
   };
 
   useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
     fetchData();
-  }, [user]);
+  }, [user, navigate]);
   
   const handleOpenModal = async (appointment, type) => {
     setSelectedAppointment(appointment);
@@ -132,10 +140,10 @@ const DoctorAppointments = () => {
     }
   };
 
-  const handleSelectAppointment = (appointment) => {
-    setSelectedAppointment(appointment); 
-    handleOpenModal(appointment, "view"); 
-  };
+  // const handleSelectAppointment = (appointment) => {
+  //   setSelectedAppointment(appointment); 
+  //   handleOpenModal(appointment, "view"); 
+  // };
 
   const handleCloseModal = () => {
     setModalVisible(false);
@@ -180,6 +188,21 @@ const DoctorAppointments = () => {
     } finally {
       setUpdating(false);
     }
+  };
+
+  const handleStatusConfirmation = (appointmentId, newStatus) => {
+    Swal.fire({
+      title: 'Xác nhận thay đổi trạng thái',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleStatusChange(appointmentId, newStatus);
+        Swal.fire('Thành công!', 'Trạng thái đã được thay đổi.', 'success');
+      }
+    });
   };
 
   const handleExportInvoice = async () => {
@@ -284,23 +307,23 @@ const DoctorAppointments = () => {
       const birthYear = patient.dob ? new Date(patient.dob).getFullYear() : null;
       const age = birthYear ? currentYear - birthYear : "Không xác định";
 
-      const appointmentDate = selectedAppointment?.date || "Không xác định";
+      const appointmentDate = selectedAppointment?.date;
       const formattedDate = appointmentDate !== "Không xác định"
         ? new Date(appointmentDate).toLocaleDateString("en-GB") 
         : "Không xác định";
   
       doc.setFontSize(12);
-      doc.text(`Họ tên người bệnh: ${patient.last_name || "Không xác định"} ${patient.first_name || ""}`, 15, 40);
+      doc.text(`Họ tên người bệnh: ${patient.last_name} ${patient.first_name || ""}`, 15, 40);
       doc.text(`Giới tính: ${genderText}`, 15, 50);
       doc.text(`Tuổi: ${age} tuổi`, 15, 60);
-      doc.text(`Địa chỉ: ${patient.address || "Không xác định"}`, 15, 70); 
-      doc.text(`Số điện thoại: ${patient.phone || "Không xác định"}`, 15, 80);
+      doc.text(`Địa chỉ: ${patient.address || "Không có"}`, 15, 70); 
+      doc.text(`Số điện thoại: ${patient.phone || "Không có"}`, 15, 80);
   
       const appointment = selectedAppointment || {};
       doc.text(`Ngày khám: ${formattedDate}`, 15, 90);
-      doc.text(`Ca khám: ${appointment.time_slot || "Không xác định"}`, 15, 100);
-      doc.text(`Lí do: ${appointment.reason || "Không xác định"}`, 15, 110);
-      doc.text(`Ghi chú: ${appointment.notes || "Không xác định"}`, 15, 120);
+      doc.text(`Ca khám: ${appointment.time_slot}`, 15, 100);
+      doc.text(`Lí do: ${appointment.reason || "Không có"}`, 15, 110);
+      doc.text(`Ghi chú: ${appointment.notes || "Không có"}`, 15, 120);
       doc.text(`Chẩn đoán: ${examination.diagnosis || "Không có"}`, 15, 130);
       doc.text(`Người in phiếu: ${doctor.user.last_name || ""} ${doctor.user.first_name || ""} - ${doctor.expertise || ""}`, 15, 140);
   
@@ -549,7 +572,7 @@ const DoctorAppointments = () => {
   return (
     <>
       <Header />
-      <Container className="mt-5">
+      <Container className="mt-4">
         <h2 className="text-center mb-4">Danh sách khám bệnh</h2>
 
         <Form className="mb-4">
@@ -568,8 +591,6 @@ const DoctorAppointments = () => {
             <thead className="bg-primary text-white">
               <tr>
                 <th>STT</th>
-                {/* <th>ID lịch hẹn</th> */}
-                {/* <th>ID bệnh nhân</th> */}
                 <th>
                   Tên bệnh nhân{" "}
                   <i
@@ -581,7 +602,7 @@ const DoctorAppointments = () => {
                 <th>
                   Ngày{" "}
                   <i
-                    className={`bi ${sortDate === "desc" ? "bi-sort-down" : "bi-sort-up"}`}
+                    className={`bi ${sortDate === "desc" ? "bi-sort-up" : "bi-sort-down"}`}
                     style={{ cursor: "pointer" }}
                     onClick={handleSortDate}
                   ></i>
@@ -597,13 +618,6 @@ const DoctorAppointments = () => {
                 return (
                   <tr key={appointment.id}>
                     <td>{index + 1}</td>
-                    {/* <td>{appointment.id}</td> */}
-                    {/* <td>{patient ? patient.id : "Đang tải"}</td> */}
-                    {/* <td className="patient-name">
-                      {patient
-                        ? `${patient.user.last_name} ${patient.user.first_name}`
-                        : "Đang tải..."}
-                    </td> */}
                     <td
                         className="text-center text-primary patient-name"
                         style={{ cursor: "pointer" }}
@@ -651,77 +665,83 @@ const DoctorAppointments = () => {
                             : "Đã hủy"}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                          <Dropdown.Item
-                            onClick={() =>
-                              handleStatusChange(appointment.id, "confirmed")
-                            }
-                          >
-                            Xác nhận
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() =>
-                              handleStatusChange(appointment.id, "examining")
-                            }
-                          >
-                            Đang khám
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() =>
-                              handleStatusChange(
-                                appointment.id,
-                                "awaiting_clinical_results"
-                              )
-                            }
-                          >
-                            Đang thực hiện xét nghiệm
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() =>
-                              handleStatusChange(
-                                appointment.id,
-                                "paraclinical_results_available"
-                              )
-                            }
-                          >
-                            Có kết quả xét nghiệm
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() =>
-                              handleStatusChange(appointment.id, "completed")
-                            }
-                          >
-                            Hoàn tất
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() => handleStatusChange(appointment.id, "cancelled")}
-                          >
-                            Hủy
-                          </Dropdown.Item>
+                          {appointment.status === "pending" && (
+                            <Dropdown.Item
+                              onClick={() => handleStatusConfirmation(appointment.id, "confirmed")}
+                            >
+                              Xác nhận
+                            </Dropdown.Item>
+                          )}
+                          {appointment.status === "confirmed" && (
+                            <Dropdown.Item
+                              onClick={() => handleStatusConfirmation(appointment.id, "examining")}
+                            >
+                              Đang khám
+                            </Dropdown.Item>
+                          )}
+                          {appointment.status === "examining" && (
+                            <>
+                              <Dropdown.Item
+                                onClick={() =>
+                                  handleStatusConfirmation(appointment.id, "awaiting_clinical_results")
+                                }
+                              >
+                                Đang thực hiện xét nghiệm
+                              </Dropdown.Item>
+                              <Dropdown.Item
+                              onClick={() =>
+                                handleStatusConfirmation(appointment.id, "completed")
+                              }
+                            >
+                              Hoàn tất
+                            </Dropdown.Item>
+                          </>
+                          )}
                         </Dropdown.Menu>
                       </Dropdown>
                     </td>
                     <td>
-                      <Button
-                        variant="success"
-                        className="me-2"
-                        onClick={() => handleOpenModal(appointment, "details")}
-                      >
-                        <i className="bi bi-eye"></i>
-                      </Button>
-                      <Button
-                        variant="primary"
-                        className="me-2"
-                        onClick={() => handleOpenModal(appointment, "edit")}
-                      >
-                        <i className="bi bi-pencil"></i>
-                      </Button>
-                      <Button
-                        variant="warning"
-                        onClick={() => handleOpenModal(appointment, "assignment")}
-                      >
-                        <i className="bi bi-gear"></i>
-                      </Button>
-                    </td>
+                    {appointment.status === "pending" || appointment.status === "confirmed" ? null : (
+                      <>
+                        {(appointment.status === "examining" || 
+                          appointment.status === "awaiting_clinical_results" || 
+                          appointment.status === "paraclinical_results_available") && (
+                          <>
+                            <Button
+                              variant="success"
+                              className="me-2"
+                              onClick={() => handleOpenModal(appointment, "details")}
+                            >
+                              <i className="bi bi-eye"></i>
+                            </Button>
+                            <Button
+                              variant="primary"
+                              className="me-2"
+                              onClick={() => handleOpenModal(appointment, "edit")}
+                            >
+                              <i className="bi bi-pencil"></i>
+                            </Button>
+                            <Button
+                              variant="warning"
+                              onClick={() => handleOpenModal(appointment, "assignment")}
+                            >
+                              <i className="bi bi-gear"></i>
+                            </Button>
+                          </>
+                        )}
+
+                        {appointment.status === "completed" && (
+                          <Button
+                            variant="success"
+                            className="me-2"
+                            onClick={() => handleOpenModal(appointment, "details")}
+                          >
+                            <i className="bi bi-eye"></i>
+                          </Button>
+                        )}
+                      </>
+                    )}
+                  </td>
                   </tr>
                 );
               })}
@@ -780,10 +800,10 @@ const DoctorAppointments = () => {
                   <p><strong>Tiền sử gia đình:</strong> {examinationData.family_history || "Không có thông tin"}</p>
                   <p><strong>Triệu chứng:</strong> {examinationData.symptoms || "Không có thông tin"}</p>
                   <p><strong>Chẩn đoán:</strong> {examinationData.diagnosis || " Không có thông tin"}</p>
-                  <p><strong>Kết quả cận lâm sàng:</strong> 
+                  <p><strong>Kết quả xét nghiệm:</strong> 
                      {examinationData.paraclinical_results ? (
                       <a href={examinationData.paraclinical_results} target="_blank" rel="noopener noreferrer"> Xem kết quả</a>
-                    ) : " Không có thông tin"}
+                    ) : " Không có"}
                   </p>
                   <p><strong>Kết quả:</strong> {examinationData.results || "Không có thông tin"}</p>
                 </>
@@ -886,7 +906,6 @@ const DoctorAppointments = () => {
             {modalType === "assignment" && (
               <Form>
                 <Form.Group>
-                  {/* <Form.Label>Chỉ định dịch vụ</Form.Label> */}
                   {services.map((service) => (
                     <Form.Check
                       key={service.id}

@@ -146,7 +146,7 @@ const AppointmentHistory = () => {
                 <th>
                   Ngày{" "}
                   <i
-                    className={`bi ${sortOrder === "desc" ? "bi-sort-down" : "bi-sort-up"}`}
+                    className={`bi ${sortOrder === "desc" ? "bi-sort-up" : "bi-sort-down"}`}
                     style={{ cursor: "pointer" }}
                     onClick={handleSort}
                   ></i>

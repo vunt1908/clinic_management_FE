@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Table, Spinner, Alert, Container, Button } from "react-bootstrap";
+import { Table, Spinner, Alert, Button } from "react-bootstrap";
 import Header from "./Header";
+import Swal from 'sweetalert2'
 
 const StaffExamination = () => {
   const [examinations, setExaminations] = useState([]);
@@ -67,26 +68,61 @@ const StaffExamination = () => {
     fetchExaminations();
   }, []);
 
-  const updatePaymentStatus = async (examId, newStatus) => {
-    try {
-      const response = await axios.patch(
-        `http://127.0.0.1:8000/api/examination/${examId}/update_payment_status/`,
-        { status: newStatus },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+  const updatePaymentStatus = async (examId, newStatus, appointmentId) => {
+    const result = await Swal.fire({
+      title: "Xác nhận thay đổi",
+      text: `Bạn có chắc chắn muốn cập nhật trạng thái thanh toán thành "${newStatus === "completed" ? "Đã thanh toán" : "Chờ thanh toán"}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Đồng ý",
+      cancelButtonText: "Hủy",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.patch(
+          `http://127.0.0.1:8000/api/examination/${examId}/update_payment_status/`,
+          { status: newStatus },
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+          }
+        );
+
+        if (newStatus === "completed") {
+          await axios.patch(
+            `http://127.0.0.1:8000/api/appointments/${appointmentId}/update_status/`,
+            { status: "completed" },
+            {
+              headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+            }
+          );
         }
-      );
 
-      setExaminations((prev) =>
-        prev.map((exam) =>
-          exam.id === examId ? { ...exam, payment: { ...exam.payment, status: newStatus } } : exam
-        )
-      );
+        if (newStatus === "pending") {
+          await axios.patch(
+            `http://127.0.0.1:8000/api/appointments/${appointmentId}/update_status/`,
+            { status: "paraclinical_results_available" },
+            {
+              headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+            }
+          );
+        }
 
-      alert("Cập nhật trạng thái thành công.");
-    } catch (error) {
-      alert("Cập nhật trạng thái thanh toán thất bại!");
-      console.error(error);
+        setExaminations((prev) =>
+          prev.map((exam) =>
+            exam.id === examId 
+              ? { 
+                  ...exam, 
+                  payment: { ...exam.payment, status: newStatus },
+                  appointment: { ...exam.appointment, status: newStatus === "completed" ? "paraclinical_results_available" : exam.appointment.status },
+              } : exam
+          )
+        );
+
+        Swal.fire("Thành công!", "Trạng thái đã được cập nhật.", "success");
+      } catch (error) {
+        Swal.fire("Thất bại!", "Có lỗi xảy ra khi cập nhật trạng thái.", "error");
+      }
     }
   };
 
@@ -144,17 +180,17 @@ const StaffExamination = () => {
                   {exam.payment.status === "pending" && (
                     <Button
                       variant="success"
-                      onClick={() => updatePaymentStatus(exam.id, "completed")}
+                      onClick={() => updatePaymentStatus(exam.id, "completed", exam.appointment.id)}
                     >
-                      Đã thanh toán
+                      Thanh toán
                     </Button>
                   )}
                   {exam.payment.status === "completed" && (
                     <Button
                       variant="warning"
-                      onClick={() => updatePaymentStatus(exam.id, "pending")}
+                      onClick={() => updatePaymentStatus(exam.id, "pending", exam.appointment.id)}
                     >
-                      Hoàn lại trạng thái chờ
+                      Chờ thanh toán
                     </Button>
                   )}
                 </td>

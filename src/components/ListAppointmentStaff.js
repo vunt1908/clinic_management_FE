@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Alert, Spinner, Button, Card, Modal, Form, } from "react-bootstrap";
+import { Table, Alert, Spinner, Button, Card, Modal, Form, Container, } from "react-bootstrap";
 import Header from './Header';
 
 const ListAppointmentStaff = () => {
@@ -124,158 +124,155 @@ const ListAppointmentStaff = () => {
   return (
     <>
       <Header />
-      <Card className="shadow-sm mt-5 mx-5">
-        <Card.Body>
-          <h2 className="text-center mb-4">Danh sách đặt lịch khám</h2>
-          
-          <Form className="mb-4">
-            <Form.Control
-              type="text"
-              placeholder="Tìm kiếm theo tên bệnh nhân/bác sĩ..."
-              value={searchTerm}
-              onChange={handleSearch}
-            />
-          
-          </Form>
-          {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-          {loading ? (
-            <div className="text-center py-5">
-              <Spinner animation="border" />
-              <p>Đang tải dữ liệu...</p>
-            </div>
-          ) : (
-            <Table striped bordered hover>
-              <thead>
-                <tr className="text-center">
-                  <th>STT</th>
-                  <th>Họ và tên người bệnh</th>
-                  <th>Bác sĩ</th>
-                  <th>Ngày</th>
-                  <th>Thời gian</th>
-                  <th>Lý do</th>
-                  <th>Trạng thái</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {appointments.length > 0 ? (
-                  appointments.map((appointment, index) => (
-                    <tr key={appointment.id}>
-                      <td className="text-center">{index + 1}</td>
-                      <td
-                        className="text-center text-primary patient-name"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => handleShowPatient(appointment.patient)}
-                      >
-                        {getPatientName(appointment.patient)}
-                      </td>
-                      <td className="text-center text-primary doctor-name"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => handleShowDoctor(appointment.doctor)}
-                      >
-                        {getDoctorName(appointment.doctor)}
+      <Container className="mt-4">
+        <h2 className="text-center mb-4">Danh sách đặt lịch khám</h2>
+        <Form className="mb-4">
+          <Form.Control
+            type="text"
+            placeholder="Tìm kiếm theo tên bệnh nhân/bác sĩ..."
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+        
+        </Form>
+        {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+        {loading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" />
+            <p>Đang tải dữ liệu...</p>
+          </div>
+        ) : (
+          <Table className="table-striped table-hover table-bordered shadow-sm rounded text-center">
+            <thead>
+              <tr className="text-center">
+                <th>STT</th>
+                <th>Họ và tên người bệnh</th>
+                <th>Bác sĩ</th>
+                <th>Ngày</th>
+                <th>Thời gian</th>
+                <th>Lý do</th>
+                <th>Trạng thái</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {appointments.length > 0 ? (
+                appointments.map((appointment, index) => (
+                  <tr key={appointment.id}>
+                    <td className="text-center">{index + 1}</td>
+                    <td
+                      className="text-center text-primary patient-name"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleShowPatient(appointment.patient)}
+                    >
+                      {getPatientName(appointment.patient)}
                     </td>
-                      <td className="text-center">
-                        {appointment.date ? new Date(appointment.date).toLocaleDateString('en-GB') : "Đang tải..."}
-                      </td>
-                      <td className="text-center">{appointment.time_slot}</td>
-                      <td className="text-left">{appointment.reason}</td>
-                      <td className="text-center"><span
-                        className={`badge ${
-                          appointment.status === "confirmed"
-                            ? "bg-success"
-                            : appointment.status === "completed"
-                            ? "bg-success"
-                            : appointment.status === "examining"
-                            ? "bg-secondary"
-                            : appointment.status === "awaiting_clinical_results"
-                            ? "bg-info"
-                            : appointment.status === "paraclinical_results_available"
-                            ? "bg-primary"
-                            : appointment.status === "cancelled"
-                            ? "bg-danger"
-                            : "bg-warning"
+                    <td className="text-center text-primary doctor-name"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleShowDoctor(appointment.doctor)}
+                    >
+                      {getDoctorName(appointment.doctor)}
+                  </td>
+                    <td className="text-center">
+                      {appointment.date ? new Date(appointment.date).toLocaleDateString('en-GB') : "Đang tải..."}
+                    </td>
+                    <td className="text-center">{appointment.time_slot}</td>
+                    <td className="text-left">{appointment.reason}</td>
+                    <td className="text-center"><span
+                      className={`badge ${
+                        appointment.status === "confirmed"
+                          ? "bg-success"
+                          : appointment.status === "completed"
+                          ? "bg-success"
+                          : appointment.status === "examining"
+                          ? "bg-secondary"
+                          : appointment.status === "awaiting_clinical_results"
+                          ? "bg-info"
+                          : appointment.status === "paraclinical_results_available"
+                          ? "bg-primary"
+                          : appointment.status === "cancelled"
+                          ? "bg-danger"
+                          : "bg-warning"
+                        }`}
+                        >
+                        {getStatusText(appointment.status)}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="progress mt-2" style={{ height: "8px", width: "100px" }}>
+                        <div
+                          className={`progress-bar ${
+                            appointment.status === "pending"
+                              ? "bg-warning"
+                              : appointment.status === "confirmed"
+                              ? "bg-success"
+                              : appointment.status === "examining"
+                              ? "bg-secondary"
+                              : appointment.status === "awaiting_clinical_results"
+                              ? "bg-info"
+                              : appointment.status === "paraclinical_results_available"
+                              ? "bg-primary"
+                              : appointment.status === "completed"
+                              ? "bg-success"
+                              : appointment.status === "cancelled"
+                              ? "bg-danger"
+                              : "bg-dark"
                           }`}
-                          >
-                          {getStatusText(appointment.status)}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="progress mt-2" style={{ height: "8px", width: "100px" }}>
-                          <div
-                            className={`progress-bar ${
+                          role="progressbar"
+                          style={{
+                            width: `${
                               appointment.status === "pending"
-                                ? "bg-warning"
+                                ? "10%"
                                 : appointment.status === "confirmed"
-                                ? "bg-success"
+                                ? "30%"
                                 : appointment.status === "examining"
-                                ? "bg-secondary"
+                                ? "50%"
                                 : appointment.status === "awaiting_clinical_results"
-                                ? "bg-info"
+                                ? "70%"
                                 : appointment.status === "paraclinical_results_available"
-                                ? "bg-primary"
+                                ? "85%"
                                 : appointment.status === "completed"
-                                ? "bg-success"
+                                ? "100%"
                                 : appointment.status === "cancelled"
-                                ? "bg-danger"
-                                : "bg-dark"
-                            }`}
-                            role="progressbar"
-                            style={{
-                              width: `${
-                                appointment.status === "pending"
-                                  ? "10%"
-                                  : appointment.status === "confirmed"
-                                  ? "30%"
-                                  : appointment.status === "examining"
-                                  ? "50%"
-                                  : appointment.status === "awaiting_clinical_results"
-                                  ? "70%"
-                                  : appointment.status === "paraclinical_results_available"
-                                  ? "85%"
-                                  : appointment.status === "completed"
-                                  ? "100%"
-                                  : appointment.status === "cancelled"
-                                  ? "0%"
-                                  : "0%"
-                              }`,
-                            }}
-                            aria-valuenow={
-                              appointment.status === "pending"
-                                ? 10
-                                : appointment.status === "confirmed"
-                                ? 30
-                                : appointment.status === "examining"
-                                ? 50
-                                : appointment.status === "awaiting_clinical_results"
-                                ? 70
-                                : appointment.status === "paraclinical_results_available"
-                                ? 85
-                                : appointment.status === "completed"
-                                ? 100
-                                : appointment.status === "cancelled"
-                                ? 0
-                                : 0
-                            }
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                          ></div>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="text-center">
-                      Không có lịch hẹn nào.
+                                ? "0%"
+                                : "0%"
+                            }`,
+                          }}
+                          aria-valuenow={
+                            appointment.status === "pending"
+                              ? 10
+                              : appointment.status === "confirmed"
+                              ? 30
+                              : appointment.status === "examining"
+                              ? 50
+                              : appointment.status === "awaiting_clinical_results"
+                              ? 70
+                              : appointment.status === "paraclinical_results_available"
+                              ? 85
+                              : appointment.status === "completed"
+                              ? 100
+                              : appointment.status === "cancelled"
+                              ? 0
+                              : 0
+                          }
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                        ></div>
+                      </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </Table>
-          )}
-        </Card.Body>
-      </Card>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center">
+                    Không có lịch hẹn nào.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        )}
+      </Container>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>

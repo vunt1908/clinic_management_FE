@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Table, Spinner, Alert, Container } from "react-bootstrap";
+import { Table, Spinner, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthContext";
 import Header from "./Header";
@@ -88,7 +88,7 @@ const PatientExamination = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 'pending':
-        return 'Chờ thanh toán';
+        return 'Chưa thanh toán';
       case 'completed':
         return 'Đã thanh toán';
       default:
@@ -113,8 +113,6 @@ const PatientExamination = () => {
                 <th>Ca khám</th>
                 <th>Ngày khám</th>
                 <th>Bác sĩ</th>
-                <th>Dịch vụ sử dụng</th>
-                <th>Tổng số tiền</th>
                 <th>Quá trình bệnh lý</th>
                 <th>Tiền sử cá nhân</th>
                 <th>Tiền sử gia đình</th>
@@ -122,6 +120,8 @@ const PatientExamination = () => {
                 <th>Kết quả xét nghiệm</th>
                 <th>Chẩn đoán</th>
                 <th>Kết quả</th>
+                <th>Dịch vụ sử dụng</th>
+                <th>Tổng số tiền</th>
                 <th>Trạng thái thanh toán</th>
               </tr>
           </thead>
@@ -135,16 +135,6 @@ const PatientExamination = () => {
                   {exam.appointment.date ? new Date(exam.appointment.date).toLocaleDateString('en-GB') : "Đang tải..."}
                 </td>
                 <td className="text-center">{`${getDoctorName(exam.appointment.doctor)}`}</td>
-                <td>
-                  {exam.services.length > 0
-                    ? exam.services.map((service) => (
-                        <div key={service.id}>
-                          {service.name} ({service.price} VND)
-                        </div>
-                      ))
-                    : "Không có dịch vụ"}
-                </td>
-                <td className="text-center">{`${exam.payment.amount} VND`}</td>
                 <td>{exam.pathological_process}</td>
                 <td>{exam.personal_history}</td>
                 <td>{exam.family_history}</td>
@@ -165,19 +155,35 @@ const PatientExamination = () => {
                 </td>
                 <td>{exam.diagnosis}</td>
                 <td>{exam.results}</td>
+                <td>
+                  {exam.services.length > 0
+                    ? exam.services.map((service) => (
+                        <div key={service.id}>
+                          {service.name} ({service.price} VND)
+                        </div>
+                      ))
+                    : "Không có dịch vụ"}
+                </td>
                 <td className="text-center">
-                  <span
-                    className={`badge ${
-                      exam.payment.status === "completed"
-                        ? "bg-success"
-                        : exam.payment.status === "pending"
-                        ? "bg-warning"
-                        : "bg-warning"
-                    }`}
+                  {exam.payment?.amount ? `${exam.payment.amount} VND` : "Không có"}
+                </td>
+                <td className="text-center">
+                  {exam.payment ? (
+                    <span
+                      className={`badge ${
+                        exam.payment.status === "completed"
+                          ? "bg-success"
+                          : exam.payment.status === "pending"
+                          ? "bg-warning"
+                          : "bg-warning"
+                      }`}
                     >
-                    {getStatusText(exam.payment.status)}
+                      {getStatusText(exam.payment.status)}
                     </span>
-                  </td>
+                  ) : (
+                    "Không có"
+                  )}
+                </td>
               </tr>
               ))}
           </tbody>

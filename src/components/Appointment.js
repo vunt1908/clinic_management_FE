@@ -170,15 +170,6 @@ const Appointment = () => {
                     </Form.Select>
                   </Form.Group>
 
-                  {/* {selectedDoctor && (
-                      <Card className="mb-3 bg-light">
-                        <Card.Body>
-                          <h6>Thông tin bác sĩ:</h6>
-                          <p className="mb-1">Chuyên khoa: {selectedDoctor.expertise}</p>
-                          <p className="mb-1">Khoa: {selectedDoctor.department_name}</p>
-                        </Card.Body>
-                      </Card>
-                    )} */}
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
@@ -230,7 +221,6 @@ const Appointment = () => {
                 <Form.Label>Ghi chú</Form.Label>
                 <Form.Control
                   as="textarea"
-                  // rows={1}
                   value={formData.notes}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, notes: e.target.value }))
