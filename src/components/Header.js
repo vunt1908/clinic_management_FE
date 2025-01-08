@@ -10,7 +10,7 @@ const Header = () => {
 
   useEffect(() => {
     if (user?.role === "manager") {
-      navigate("/admin");
+      navigate("/admin/dashboard");
     }
   }, [user, navigate]);
 

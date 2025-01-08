@@ -159,13 +159,13 @@ const PatientExamination = () => {
                   {exam.services.length > 0
                     ? exam.services.map((service) => (
                         <div key={service.id}>
-                          {service.name} ({service.price} VND)
+                          {service.name} ({service.price.toLocaleString('vi-VN')} VND)
                         </div>
                       ))
-                    : "Không có dịch vụ"}
+                    : "Không có"}
                 </td>
                 <td className="text-center">
-                  {exam.payment?.amount ? `${exam.payment.amount} VND` : "Không có"}
+                  {exam.payment?.amount ? `${parseFloat(exam.payment.amount).toLocaleString('vi-VN')} VND` : "Không có"}
                 </td>
                 <td className="text-center">
                   {exam.payment ? (

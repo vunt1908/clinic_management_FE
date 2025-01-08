@@ -32,10 +32,10 @@ const Login = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = 'Username không được để trống';
     }
     if (!formData.password.trim()) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Mật khẩu không được để trống';
     }
     return newErrors;
   };

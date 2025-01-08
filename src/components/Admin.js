@@ -90,16 +90,6 @@ const Admin = () => {
             <FaHospital className="me-2" />
             {isSidebarOpen && "Quản lý khoa"}
           </Link>
-
-          {/* <Link to="/admin/manage-examinations" className="d-flex align-items-center p-3 text-decoration-none text-dark">
-            <FaHospital className="me-2" />
-            {isSidebarOpen && "Quản lý thông tin khám bệnh"}
-          </Link> */}
-
-          {/* <Link to="/admin/manage-payments" className="d-flex align-items-center p-3 text-decoration-none text-dark">
-            <FaHospital className="me-2" />
-            {isSidebarOpen && "Quản lý thanh toán"}
-          </Link> */}
         </nav>
       </div>
 

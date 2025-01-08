@@ -191,7 +191,6 @@ const StaffAppointment = () => {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, notes: e.target.value }))
                   }
-                  // required
                 />
               </Form.Group>
 

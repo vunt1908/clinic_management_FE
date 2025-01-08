@@ -121,17 +121,17 @@ const ParaclinicalResults = () => {
     setSelectedAppointment(null);
   };
 
-  const handleFileChange = (e) => {
-    setExaminationData({
-      ...examinationData,
-      paraclinical_results: e.target.files[0],
-    });
-  };
+  // const handleFileChange = (e) => {
+  //   setExaminationData({
+  //     ...examinationData,
+  //     paraclinical_results: e.target.files[0],
+  //   });
+  // };
 
   const handleStatusChange = async (appointmentId, newStatus) => {
     setUpdating(true);
     try {
-      const response = await axios.patch(
+      await axios.patch(
         `http://127.0.0.1:8000/api/appointments/${appointmentId}/update_status/`,
         { status: newStatus },
         {
@@ -182,7 +182,7 @@ const ParaclinicalResults = () => {
           { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
         );
 
-        if (response.data.length != 0) {
+        if (response.data.length !== 0) {
           await axios.patch(
             `http://127.0.0.1:8000/api/examination/${response.data[0].id}/`,
             formData,
@@ -242,7 +242,7 @@ const ParaclinicalResults = () => {
         }
       }
   
-      alert("Xóa kết quả xét nghiệm thành công");
+      alert("Xóa kết quả xét nghiệm thành công.");
       setExaminationData((prevData) => ({
         ...prevData,
         paraclinical_results: null,
@@ -255,54 +255,53 @@ const ParaclinicalResults = () => {
     }
   };
 
-  const handleServiceToggle = (serviceId) => {
-    setSelectedServices((prev) =>
-      prev.includes(serviceId)
-        ? prev.filter((id) => id !== serviceId)  
-        : [...prev, serviceId]  
-    );
-  };
+  // const handleServiceToggle = (serviceId) => {
+  //   setSelectedServices((prev) =>
+  //     prev.includes(serviceId)
+  //       ? prev.filter((id) => id !== serviceId)  
+  //       : [...prev, serviceId]  
+  //   );
+  // };
 
-  const handleSaveServices = async () => {
-    try {
-      const payload = {
-        services: selectedServices,
-      };
+  // const handleSaveServices = async () => {
+  //   try {
+  //     const payload = {
+  //       services: selectedServices,
+  //     };
 
-      if (selectedAppointment.examination) {
-        await axios.patch(
-          `http://127.0.0.1:8000/api/examination/${selectedAppointment.examination.id}`, 
-          payload, 
-          {
-            headers: { 
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}` 
-            }
-          }
-        );
+  //     if (selectedAppointment.examination) {
+  //       await axios.patch(
+  //         `http://127.0.0.1:8000/api/examination/${selectedAppointment.examination.id}`, 
+  //         payload, 
+  //         {
+  //           headers: { 
+  //             Authorization: `Bearer ${localStorage.getItem("accessToken")}` 
+  //           }
+  //         }
+  //       );
   
-        alert("Dịch vụ đã được cập nhật.");
-        handleCloseModal();  
-      } else {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/api/examination/?appointment=${selectedAppointment.id}`,
-          { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
-        );
-        if (response.data.length >= 0) {
-          await axios.patch(
-            `http://127.0.0.1:8000/api/examination/${response.data[0].id}/`,
-            payload,
-            { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
-          );
-        }
+  //       alert("Dịch vụ đã được cập nhật.");
+  //       handleCloseModal();  
+  //     } else {
+  //       const response = await axios.get(
+  //         `http://127.0.0.1:8000/api/examination/?appointment=${selectedAppointment.id}`,
+  //         { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
+  //       );
+  //       if (response.data.length >= 0) {
+  //         await axios.patch(
+  //           `http://127.0.0.1:8000/api/examination/${response.data[0].id}/`,
+  //           payload,
+  //           { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
+  //         );
+  //       }
   
-        alert("Dịch vụ đã được cập nhật.");
-        handleCloseModal(); 
-      }
-    } catch (err) {
-      console.error("Không thể lưu dịch vụ:", err);
-      alert("Không thể lưu dịch vụ.");
-    }
-  };
+  //       alert("Dịch vụ đã được cập nhật.");
+  //       handleCloseModal(); 
+  //     }
+  //   } catch (err) {
+  //     alert("Không thể lưu dịch vụ.");
+  //   }
+  // };
 
   const handleStatusConfirmation = (appointmentId, newStatus) => {
     Swal.fire({
@@ -330,7 +329,7 @@ const ParaclinicalResults = () => {
         {appointments.length === 0 ? (
           <Alert variant="info">Không có lịch đặt khám nào.</Alert>
         ) : (
-          <Table striped bordered hover>
+          <Table className="table-striped table-hover table-bordered shadow-sm rounded align-middle">
             <thead>
               <tr className="text-center">
                 <th>STT</th>
@@ -460,7 +459,6 @@ const ParaclinicalResults = () => {
                       type="checkbox"
                       label={`${service.name} - ${service.price ? `${service.price.toLocaleString()} VND` : 'Liên hệ'}`}
                       checked={selectedServices.includes(service.id)}
-                      // onChange={() => handleServiceToggle(service.id)}
                       readOnly
                       disabled
                     />
@@ -483,14 +481,6 @@ const ParaclinicalResults = () => {
                 </Button>
               </>
             )}
-            {/* {modalType === "assignment" && (
-              <Button variant="primary" onClick={handleSaveServices}>
-                Lưu
-              </Button>
-            )}
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Đóng
-            </Button> */}
           </Modal.Footer>
         </Modal>
       )}

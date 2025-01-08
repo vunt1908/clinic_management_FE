@@ -49,15 +49,6 @@ const Dashboard = () => {
 
   const chartOptions = {
     animationEnabled: true,
-    // title: {
-    //   text: `Doanh thu theo ${
-    //     chartFilter === "week"
-    //       ? "tuần"
-    //       : chartFilter === "month"
-    //       ? "tháng"
-    //       : "năm"
-    //   }`,
-    // },
     data: [
       {
         type: "column",
@@ -196,7 +187,6 @@ const Dashboard = () => {
           >
             <option value="week">Theo ngày</option>
             <option value="month">Theo tháng</option>
-            {/* <option value="day">Theo ngày</option> */}
           </select>
         </div>
         <CanvasJSChart options={chartOptions} />

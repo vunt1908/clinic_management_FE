@@ -147,14 +147,14 @@ const StaffExamination = () => {
         <h2 className="text-center mb-4">Danh sách thanh toán</h2>
         <Table striped bordered hover className="text-center align-middle">
           <thead>
-            <tr>
+            <tr className="text-center">
               <th>Họ và tên người bệnh</th>
-              <th className="text-center">Ca khám</th>
-              <th className="text-center">Ngày khám</th>
-              <th className="text-center">Dịch vụ sử dụng</th>
-              <th className="text-center">Tổng số tiền</th>
-              <th className="text-center">Trạng thái thanh toán</th>
-              <th className="text-center">Hành động</th>
+              <th>Ca khám</th>
+              <th>Ngày khám</th>
+              <th>Dịch vụ sử dụng</th>
+              <th>Tổng số tiền</th>
+              <th>Trạng thái thanh toán</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -174,7 +174,7 @@ const StaffExamination = () => {
                     <div key={service.id}>{service.name}</div>
                   ))}
                 </td>
-                <td className="text-center">{exam.payment.amount} VND</td>
+                <td className="text-center">{parseFloat(exam.payment.amount).toLocaleString('vi-VN')} VNĐ</td>
                 <td className="text-center">{getPaymentStatusLabel(exam.payment.status)}</td>
                 <td className="text-center">
                   {exam.payment.status === "pending" && (

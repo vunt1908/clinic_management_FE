@@ -41,8 +41,6 @@ const Register = () => {
     const newErrors = {};
     if (!formData.username.trim()) newErrors.username = 'Vui lòng nhập username';
     if (!formData.password.trim()) newErrors.password = 'Vui lòng nhập mật khẩu';
-    // if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email))
-    //   newErrors.email = 'Valid email is required';
     if (!formData.first_name.trim()) newErrors.first_name = 'Vui lòng nhập tên';
     if (!formData.last_name.trim()) newErrors.last_name = 'Vui lòng nhập họ và tên đệm';
     if (!formData.phone.trim()) newErrors.phone = 'Vui lòng nhập số điện thoại';

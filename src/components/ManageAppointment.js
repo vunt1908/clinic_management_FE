@@ -9,6 +9,9 @@ const ManageAppointment = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [examination, setExamination] = useState(null);
+  const [payment, setPayment] = useState(null);
+  const [services, setServices] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [formData, setFormData] = useState({
     doctor: '',
@@ -58,6 +61,53 @@ const ManageAppointment = () => {
       setAvailableSlots(response.data.available_slots);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách ca khám khả dụng:', error);
+    }
+  };
+
+  const fetchService = async (serviceIds) => {
+    try {
+      const serviceResponses = await Promise.all(
+        serviceIds.map((id) =>
+          axios.get(`http://127.0.0.1:8000/api/services/${id}/`)
+        )
+      );
+      setServices(serviceResponses.map((response) => response.data));
+    } catch (error) {
+      console.error("Lỗi API dịch vụ", error);
+    }
+  };
+
+  const fetchPayment = async (paymentId) => {
+    try {
+      const paymentResponse = await axios.get(
+        `http://127.0.0.1:8000/api/payments/${paymentId}/`
+      );
+      return paymentResponse.data;
+    } catch (error) {
+      console.error("Lỗi API thanh toán", error);
+      return null;
+    }
+  };
+
+  const fetchExamination = async (appointmentId) => {
+    try {
+      const examinationResponse = await axios.get(
+        `http://127.0.0.1:8000/api/examination/`,
+        { params: { appointment: appointmentId } }
+      );
+  
+      if (examinationResponse.data.length > 0) {
+        const examination = examinationResponse.data[0];
+        setExamination(examination);
+
+        await fetchService(examination.services); 
+        const paymentData = await fetchPayment(examination.payment);
+        setPayment(paymentData);
+      } else {
+        alert("Không tìm thấy thông tin khám bệnh.");
+      }
+    } catch (error) {
+      alert("Có lỗi xảy ra khi tải thông tin khám bệnh.");
     }
   };
 
@@ -161,9 +211,9 @@ const ManageAppointment = () => {
       case 'examining':
         return 'Đang khám';
       case 'awaiting_clinical_results':
-        return 'Đang thực hiện xét nghiệm cận lâm sàng';
+        return 'Đang thực hiện xét nghiệm';
       case 'paraclinical_results_available':
-        return 'Đã có kết quả xét nghiệm cận lâm sàng';
+        return 'Đã có kết quả xét nghiệm';
       case 'completed':
         return 'Đã hoàn thành';
       case 'cancelled':
@@ -215,16 +265,8 @@ const ManageAppointment = () => {
                   {appointment.date ? new Date(appointment.date).toLocaleDateString('en-GB') : "Đang tải..."}
                 </td>
                 <td>{appointment.time_slot}</td>
-                <td>{appointment.reason}</td>
-                <td>{appointment.notes}</td>
-                {/* <td>{{
-                  pending: "Chờ xác nhận",
-                  confirmed: "Đã xác nhận",
-                  examining: "Đang khám",
-                  completed: "Đã hoàn thành",
-                  cancelled: "Đã hủy",
-                }[appointment.status] || "Không có"}
-                </td> */}
+                <td>{appointment.reason || "Không có"}</td>
+                <td>{appointment.notes || "Không có"}</td>
                 <td>
                   <span
                     className={`badge ${
@@ -247,20 +289,33 @@ const ManageAppointment = () => {
                     </span>
                 </td>
                 <td>
-                  <Button
-                    variant="info"
-                    size="sm"
-                    onClick={() => handleShow('edit', appointment)}
-                    className="me-2"
-                  >
-                    Chỉnh sửa
-                  </Button>
+                  {(appointment.status === "paraclinical_results_available" || appointment.status === "completed") && (
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={() => fetchExamination(appointment.id)}
+                      className="me-2"
+                    >
+                      <i className="bi bi-eye"></i>
+                    </Button>
+                  )}
+                  {appointment.status === "pending" && (
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      onClick={() => handleShow('edit', appointment)}
+                      className="me-2"
+                    >
+                      <i className="bi bi-pencil"></i>
+                    </Button>
+                  )}
                   <Button
                     variant="danger"
                     size="sm"
+                    className="me-2"
                     onClick={() => handleShow('delete', appointment)}
                   >
-                    Xoá
+                    <i class="bi bi-trash"></i>
                   </Button>
                 </td>
               </tr>
@@ -268,6 +323,52 @@ const ManageAppointment = () => {
         })}
         </tbody>
       </Table>
+
+      <Modal show={!!examination} onHide={() => setExamination(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Thông tin khám bệnh</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {examination ? (
+            <div>
+              <p><strong>Quá trình bệnh lý:</strong> {examination.pathological_process}</p>
+              <p><strong>Tiền sử cá nhân:</strong> {examination.personal_history}</p>
+              <p><strong>Tiền sử gia đình:</strong> {examination.family_history}</p>
+              <p><strong>Triệu chứng:</strong> {examination.symptoms}</p>
+              <p><strong>Chẩn đoán:</strong> {examination.diagnosis}</p>
+              <p><strong>Kết quả:</strong> {examination.results}</p>
+              <p><strong>Kết quả xét nghiệm:</strong> 
+                  {examination.paraclinical_results ? (
+                  <a href={examination.paraclinical_results} target="_blank" rel="noopener noreferrer"> Xem kết quả</a>
+                ) : " Không có"}
+              </p>
+              <h5>Dịch vụ đã sử dụng</h5>
+              {services.length > 0 ? (
+                <ul>
+                  {services.map((service) => (
+                    <li key={service.id}>
+                      {service.name} - {parseFloat(service.price).toLocaleString()} VND
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>Không có.</p>
+              )}
+              <p>
+                <strong>Tổng số tiền:</strong>{" "}
+                {payment ? `${parseFloat(payment.amount).toLocaleString()} VND` : "Không có thông tin thanh toán"}
+              </p>
+            </div>
+          ) : (
+            <p>Không có thông tin khám bệnh.</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setExamination(null)}>
+            Đóng
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -397,7 +498,6 @@ const ManageAppointment = () => {
                 >
                   <option value="pending">Đang chờ xác nhận</option>
                   <option value="confirmed">Đã xác nhận</option>
-                  <option value="examining">Đang khám</option>
                   <option value="completed">Đã hoàn thành</option>
                   <option value="cancelled">Đã huỷ</option>
                 </Form.Select>

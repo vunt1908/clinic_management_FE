@@ -140,7 +140,7 @@ const ManageService = () => {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Quản lý dịch vụ cận lâm sàng</h2>
+        <h2>Quản lý dịch vụ</h2>
         <Button variant="primary" onClick={() => handleShow("add")}>
           Thêm mới dịch vụ
         </Button>
@@ -168,14 +168,14 @@ const ManageService = () => {
                   className="me-2"
                   onClick={() => handleShow("edit", service)}
                 >
-                  Chỉnh sửa
+                  <i className="bi bi-pencil"></i>
                 </Button>
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => handleShow("delete", service)}
                 >
-                  Xoá
+                  <i className="bi bi-trash"></i>
                 </Button>
               </td>
             </tr>

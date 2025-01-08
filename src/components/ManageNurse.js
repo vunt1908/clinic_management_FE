@@ -79,7 +79,6 @@ const ManageNurse = () => {
     try {
       const nurseData = {
         user: {
-          // username: formData.username,
           email: formData.email,
           password: formData.password,
           gender: formData.gender,
@@ -181,14 +180,14 @@ const ManageNurse = () => {
                   onClick={() => handleShow('edit', nurse)}
                   className="me-2"
                 >
-                  Chỉnh sửa
+                  <i className="bi bi-pencil"></i>
                 </Button>
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => handleShow('delete', nurse)}
                 >
-                  Xoá
+                  <i className="bi bi-trash"></i>
                 </Button>
               </td>
             </tr>

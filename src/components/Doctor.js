@@ -43,7 +43,7 @@ const Doctor = () => {
           <Table striped bordered hover className="text-center">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>STT</th>
                 <th>Tên bác sĩ</th>
                 <th>Email</th>
                 <th>Số điện thoại</th>

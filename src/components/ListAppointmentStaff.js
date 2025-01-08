@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Alert, Spinner, Button, Card, Modal, Form, Container, } from "react-bootstrap";
+import { Table, Alert, Spinner, Button, Modal, Form, Container, } from "react-bootstrap";
 import Header from './Header';
 
 const ListAppointmentStaff = () => {
@@ -13,6 +13,8 @@ const ListAppointmentStaff = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showDoctorModal, setShowDoctorModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [sortDate, setSortDate] = useState("desc");
+  const [sortName, setSortName] = useState("asc");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,7 +98,7 @@ const ListAppointmentStaff = () => {
   const removeVietnamese = (str) => {
     return str
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu tiếng Việt
+      .replace(/[\u0300-\u036f]/g, "") 
       .replace(/đ/g, "d")
       .replace(/Đ/g, "D");
   };
@@ -119,6 +121,32 @@ const ListAppointmentStaff = () => {
         row.classList.add("d-none"); 
       }
     });
+  };
+
+  const handleSortName = () => {
+    const sortedAppointments = [...appointments].sort((a, b) => {
+      const doctorA = doctors[a.doctor]?.user.first_name || "";
+      const doctorB = doctors[b.doctor]?.user.first_name || "";
+  
+      if (sortName === "asc") {
+        return doctorA.localeCompare(doctorB);
+      } else {
+        return doctorB.localeCompare(doctorA);
+      }
+    });
+  
+    setAppointments(sortedAppointments);
+    setSortName(sortName === "asc" ? "desc" : "asc"); 
+  };
+
+  const handleSortDate = () => {
+    const sortedAppointments = [...appointments].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return sortDate === "desc" ? dateB - dateA : dateA - dateB;
+    });
+    setAppointments(sortedAppointments);
+    setSortDate(sortDate === "desc" ? "asc" : "desc"); 
   };
 
   return (
@@ -147,8 +175,22 @@ const ListAppointmentStaff = () => {
               <tr className="text-center">
                 <th>STT</th>
                 <th>Họ và tên người bệnh</th>
-                <th>Bác sĩ</th>
-                <th>Ngày</th>
+                <th>
+                  Bác sĩ{" "}
+                  <i
+                    className={`bi ${sortName === "asc" ? "bi-sort-alpha-down" : "bi-sort-alpha-up"}`}
+                    style={{ cursor: "pointer" }}
+                    onClick={handleSortName}
+                  ></i>
+                </th>
+                <th>
+                  Ngày{" "}
+                  <i
+                    className={`bi ${sortDate === "desc" ? "bi-sort-up" : "bi-sort-down"}`}
+                    style={{ cursor: "pointer" }}
+                    onClick={handleSortDate}
+                  ></i>
+                </th>
                 <th>Thời gian</th>
                 <th>Lý do</th>
                 <th>Trạng thái</th>
@@ -173,7 +215,7 @@ const ListAppointmentStaff = () => {
                     >
                       {getDoctorName(appointment.doctor)}
                   </td>
-                    <td className="text-center">
+                    <td>
                       {appointment.date ? new Date(appointment.date).toLocaleDateString('en-GB') : "Đang tải..."}
                     </td>
                     <td className="text-center">{appointment.time_slot}</td>

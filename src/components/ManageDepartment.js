@@ -193,14 +193,14 @@ const ManageDepartment = () => {
                   className="me-2"
                   onClick={() => handleShow("edit", department)}
                 >
-                  Chỉnh sửa
+                  <i className="bi bi-pencil"></i>
                 </Button>
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => handleShow("delete", department)}
                 >
-                  Xoá
+                  <i className="bi bi-trash"></i>
                 </Button>
               </td>
             </tr>

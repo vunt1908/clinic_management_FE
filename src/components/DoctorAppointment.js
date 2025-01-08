@@ -35,7 +35,6 @@ const DoctorAppointments = () => {
     family_history: "",
     symptoms: "",
     diagnosis: "",
-    // paraclinical_results: null,
     results: "",
   });
   const [selectedServices, setSelectedServices] = useState([]);
@@ -120,7 +119,6 @@ const DoctorAppointments = () => {
             symptoms: "",
             diagnosis: "",
             results: "",
-            // paraclinical_results: null,
           });
           setSelectedServices([]);
         }
@@ -133,17 +131,11 @@ const DoctorAppointments = () => {
           symptoms: "",
           diagnosis: "",
           results: "",
-          // paraclinical_results: null,
         });
         setSelectedServices([]);
       }
     }
   };
-
-  // const handleSelectAppointment = (appointment) => {
-  //   setSelectedAppointment(appointment); 
-  //   handleOpenModal(appointment, "view"); 
-  // };
 
   const handleCloseModal = () => {
     setModalVisible(false);
@@ -153,7 +145,6 @@ const DoctorAppointments = () => {
       family_history: "",
       symptoms: "",
       diagnosis: "",
-      // paraclinical_results: null,
       results: "",
     });
     setSelectedServices([]);
@@ -164,7 +155,7 @@ const DoctorAppointments = () => {
   const handleStatusChange = async (appointmentId, newStatus) => {
     setUpdating(true);
     try {
-      const response = await axios.patch(
+      await axios.patch(
         `http://127.0.0.1:8000/api/appointments/${appointmentId}/update_status/`,
         { status: newStatus },
         {
@@ -291,7 +282,7 @@ const DoctorAppointments = () => {
       const examination = examinationResponse.data || {};
 
       if (!examination) {
-        alert("Không tìm thấy thông tin khám.");
+        alert("Không tìm thấy thông tin khám bệnh.");
         return;
       }
 
@@ -325,7 +316,8 @@ const DoctorAppointments = () => {
       doc.text(`Lí do: ${appointment.reason || "Không có"}`, 15, 110);
       doc.text(`Ghi chú: ${appointment.notes || "Không có"}`, 15, 120);
       doc.text(`Chẩn đoán: ${examination.diagnosis || "Không có"}`, 15, 130);
-      doc.text(`Người in phiếu: ${doctor.user.last_name || ""} ${doctor.user.first_name || ""} - ${doctor.expertise || ""}`, 15, 140);
+      doc.text(`Kết quả: ${examination.results || "Không có"}`, 15, 140);
+      doc.text(`Người in phiếu: ${doctor.user.last_name || ""} ${doctor.user.first_name || ""} - ${doctor.expertise || ""} - ${doctor.department_name || ""}`, 15, 150);
   
       const selectedServiceDetails = services
         .filter((service) => selectedServices.includes(service.id))
@@ -337,7 +329,7 @@ const DoctorAppointments = () => {
       doc.autoTable({
         head: [["Dịch vụ cận lâm sàng", "Giá tiền"]],
         body: selectedServiceDetails,
-        startY: 150,
+        startY: 160,
         styles: {
           font: "Roboto", 
         },
@@ -355,7 +347,6 @@ const DoctorAppointments = () => {
   
       doc.save("Phieu_thu_tien_kiem_bang_ke_chi_phi.pdf");
     } catch (error) {
-      console.error("Lỗi khi lấy thông tin bệnh nhân hoặc xuất hóa đơn:", error);
       alert("Không thể lấy thông tin bệnh nhân hoặc xuất hóa đơn.");
     }
   };
@@ -367,8 +358,7 @@ const DoctorAppointments = () => {
         personal_history: examinationData?.personal_history || "",
         family_history: examinationData?.family_history || "",
         symptoms: examinationData?.symptoms || "",
-        diagnosis: examinationData?.diagnosis || "",
-        // paraclinical_results: examinationData?.paraclinical_results || null, 
+        diagnosis: examinationData?.diagnosis || "", 
         results: examinationData?.results || "",
         services: selectedServices,
       };
@@ -404,7 +394,6 @@ const DoctorAppointments = () => {
       handleCloseModal();
       fetchData();
     } catch (err) {
-      console.error(err);
       alert("Không thể lưu thông tin khám bệnh.");
     }
   };
@@ -499,7 +488,6 @@ const DoctorAppointments = () => {
       handleCloseModal();
       fetchData();
     } catch (err) {
-      console.error("Không thể lưu dịch vụ hoặc cập nhật thanh toán:", err);
       alert("Không thể lưu dịch vụ hoặc cập nhật thanh toán.");
     }
   };
@@ -920,6 +908,11 @@ const DoctorAppointments = () => {
             )}
           </Modal.Body>
           <Modal.Footer>
+            {modalType === "details" && (
+              <Button variant="success" onClick={handleExportInvoice}>
+                In phiếu
+              </Button>
+            )}
             {modalType === "edit" && (
               <Button variant="primary" onClick={handleSaveExamination}>
                 Lưu

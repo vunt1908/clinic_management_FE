@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Navbar, Nav, Dropdown, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import axios from 'axios';
-import { useAuth } from '../components/AuthContext';
 import departmentLogo from '../assets/logo.png';
 import Header from "./Header";
 
@@ -11,8 +9,6 @@ const Department = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -28,11 +24,6 @@ const Department = () => {
 
     fetchDepartments();
   }, []);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
 
   const handleSelectDepartment = (department) => {
     setSelectedDepartment(department);
@@ -62,63 +53,7 @@ const Department = () => {
 
   return (
     <div>
-      {/* <Navbar bg="light" expand="lg" className="shadow-sm">
-        <Container>
-          <Navbar.Brand onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            Clinic
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link onClick={() => navigate('/')}>Trang chủ</Nav.Link>
-              <Nav.Link onClick={() => navigate('/about')}>Về chúng tôi</Nav.Link>
-              <Nav.Link onClick={() => navigate('/departments')} className="active">
-                Phòng khoa
-              </Nav.Link>
-              <Nav.Link onClick={() => navigate('/doctors')}>Bác sĩ</Nav.Link>
-            </Nav>
-            <div>
-              {user ? (
-                <Dropdown align="end">
-                  <Dropdown.Toggle variant="outline-primary" id="user-dropdown">
-                    {user.username}
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item onClick={() => navigate('/profile')}>
-                      Xem Profile
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => navigate('/appointments/history')}>
-                      Lịch sử đặt lịch
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => navigate('/medical-records')}>
-                      Hồ sơ bệnh án
-                    </Dropdown.Item>
-                    <Dropdown.Divider />
-                    <Dropdown.Item onClick={handleLogout} className="text-danger">
-                      Đăng xuất
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              ) : (
-                <>
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => navigate('/login')}
-                    className="me-2"
-                  >
-                    Đăng nhập
-                  </Button>
-                  <Button variant="primary" onClick={() => navigate('/register')}>
-                    Đăng ký
-                  </Button>
-                </>
-              )}
-            </div>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar> */}
       <Header />
-
       <Container className="py-5">
         {!selectedDepartment ? (
           <Row xs={1} md={2} lg={3} className="g-4">

@@ -79,7 +79,6 @@ const ManageStaff = () => {
     try {
       const staffData = {
         user: {
-          // username: formData.username,
           email: formData.email,
           password: formData.password,
           first_name: formData.first_name,
@@ -181,14 +180,14 @@ const ManageStaff = () => {
                   onClick={() => handleShow('edit', staff)}
                   className="me-2"
                 >
-                  Chỉnh sửa
+                  <i className="bi bi-pencil"></i>
                 </Button>
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => handleShow('delete', staff)}
                 >
-                  Xoá
+                  <i className="bi bi-trash"></i>
                 </Button>
               </td>
             </tr>

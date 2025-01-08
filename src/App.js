@@ -15,10 +15,8 @@ import ManageDoctor from './components/ManageDoctor';
 import ManagePatient from './components/ManagePatient';
 import ManageAppointment from './components/ManageAppointment';
 import ManageStaff from './components/ManageStaff';
-import MedicalRecords from './components/MedicalRecord';
 import Reception from './components/Reception';
 import ManageService from './components/ManageService';
-import DoctorMedicalRecord from './components/DoctorMedicalRecord';
 import Payment from './components/Payment';
 import ListAppointmentStaff from './components/ListAppointmentStaff';
 import StaffAppointment from './components/StaffAppointment';
@@ -42,8 +40,6 @@ const App = () => {
           <Route path="/departments" element={<Department />} />
           <Route path="/doctors" element={< Doctor />} />
           <Route path='/appointments' element={<Appointment/>} />
-          <Route path='/medical-records' element={<MedicalRecords/>} />
-          <Route path='/doctor-medical-record' element={<DoctorMedicalRecord />} />
           <Route path="/appointments/history" element={<AppointmentHistory />} />
           <Route path="/appointments/doctor" element={<DoctorAppointments />} />
           <Route path='/appointments/staff' element={<ListAppointmentStaff />} />
