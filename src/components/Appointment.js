@@ -164,7 +164,7 @@ const Appointment = () => {
                       <option value="">-- Chọn bác sĩ --</option>
                       {doctors.map((doctor) => (
                         <option key={doctor.id} value={doctor.id}>
-                          {doctor.user.last_name} {doctor.user.first_name} - {doctor.expertise}
+                          {doctor.user.last_name} {doctor.user.first_name} - {doctor.expertise} - {doctor.department_name}
                         </option>
                       ))}
                     </Form.Select>
